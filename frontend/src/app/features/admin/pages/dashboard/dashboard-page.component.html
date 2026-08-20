@@ -1,0 +1,175 @@
+
+    <div class="py-10 bg-slate-950 text-white min-h-screen">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-slate-800">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+              <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Espace Gestionnaire Pressing LIC</span>
+            </div>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight mt-1">Tableau de Bord & Métriques</h1>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <a
+              routerLink="/admin/services"
+              class="btn btn-md btn-outline-dark"
+            >
+              <span>Gérer les Services</span>
+            </a>
+            <a
+              routerLink="/admin/tickets"
+              class="btn btn-md bg-fresh-500 hover:bg-fresh-400 text-slate-950 shadow-lg shadow-fresh-500/20"
+            >
+              <span>Gérer les Tickets</span>
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        @if (isLoading()) {
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            @for (i of [1, 2, 3]; track i) {
+              <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 h-36 animate-pulse"></div>
+            }
+          </div>
+        } @else {
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            
+            <div
+              [routerLink]="['/admin/tickets']"
+              (keydown.enter)="navigateToTickets()"
+              role="button"
+              tabindex="0"
+              class="p-6 rounded-3xl bg-slate-900 border border-slate-800 hover:border-cyan-500/50 shadow-xl relative overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+            >
+              <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl group-hover:bg-cyan-500/20 transition-all"></div>
+              <div class="flex justify-between items-start mb-2">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tickets Créés Aujourd'hui</p>
+                <span class="text-cyan-400 text-xs font-bold group-hover:translate-x-1 transition-transform">Voir ➔</span>
+              </div>
+              <h2 class="text-4xl font-extrabold text-white">{{ stats()?.tickets_created_today || 0 }}</h2>
+              <p class="text-xs text-slate-400 mt-2">Dépôts enregistrés par les clients</p>
+            </div>
+
+            <div
+              [routerLink]="['/admin/tickets']"
+              (keydown.enter)="navigateToTickets()"
+              role="button"
+              tabindex="0"
+              class="p-6 rounded-3xl bg-slate-900 border border-slate-800 hover:border-fresh-500/50 shadow-xl relative overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+            >
+              <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-fresh-500/10 rounded-full blur-xl group-hover:bg-fresh-500/20 transition-all"></div>
+              <div class="flex justify-between items-start mb-2">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tickets Récupérés Aujourd'hui</p>
+                <span class="text-fresh-400 text-xs font-bold group-hover:translate-x-1 transition-transform">Voir ➔</span>
+              </div>
+              <h2 class="text-4xl font-extrabold text-fresh-400">{{ stats()?.tickets_retrieved_today || 0 }}</h2>
+              <p class="text-xs text-slate-400 mt-2">Commandes restituées & clôturées</p>
+            </div>
+
+            <div
+              [routerLink]="['/admin/tickets']"
+              (keydown.enter)="navigateToTickets()"
+              role="button"
+              tabindex="0"
+              class="p-6 rounded-3xl bg-slate-900 border border-slate-800 hover:border-emerald-500/50 shadow-xl relative overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+            >
+              <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-all"></div>
+              <div class="flex justify-between items-start mb-2">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Recette Journalière Encaissée</p>
+                <span class="text-emerald-400 text-xs font-bold group-hover:translate-x-1 transition-transform">Voir ➔</span>
+              </div>
+              <h2 class="text-3xl font-extrabold text-emerald-400">{{ stats()?.revenue_today || 0 | cfa }}</h2>
+              <p class="text-xs text-slate-400 mt-2">Paiements enregistrés en espèces</p>
+            </div>
+
+          </div>
+        }
+
+        
+        <div class="mb-10 p-6 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 class="text-base font-bold text-white">Raccourcis Gestionnaire</h3>
+            <p class="text-xs text-slate-400">Accédez directement aux opérations courantes au comptoir.</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <a routerLink="/admin/services" class="btn btn-sm btn-outline-dark">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 4v16" />
+                <path d="M4 12h16" />
+              </svg>
+              Ajouter un Service
+            </a>
+            <a routerLink="/admin/tickets" class="btn btn-sm btn-outline-dark text-cyan-400">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <rect x="8" y="2" width="8" height="4" rx="1" />
+                <path d="M9 14h6" />
+                <path d="M9 18h6" />
+              </svg>
+              Liste des Tickets
+            </a>
+            <a routerLink="/admin/tickets" class="btn btn-sm btn-outline-dark text-emerald-400">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect width="20" height="12" x="2" y="6" rx="2" />
+                <circle cx="12" cy="12" r="2" />
+                <path d="M6 12h.01M18 12h.01" />
+              </svg>
+              Encaissement Comptoir
+            </a>
+          </div>
+        </div>
+
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl">
+            <h3 class="text-base font-bold text-white mb-4 flex items-center justify-between">
+              <span>Évolution Mensuelle des Tickets (12 mois)</span>
+            </h3>
+            <div class="relative h-72">
+              <canvas #monthlyChart></canvas>
+              @if (!hasMonthlyData() && !isLoading()) {
+                <div class="absolute inset-0 flex items-center justify-center text-xs text-slate-500">Aucune donnée mensuelle disponible</div>
+              }
+            </div>
+          </div>
+
+          
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl">
+            <h3 class="text-base font-bold text-white mb-4 flex items-center justify-between gap-3">
+              <span>Répartition du Chiffre d'Affaires par Service</span>
+              <select
+                [ngModel]="selectedMonth()"
+                (ngModelChange)="setSelectedMonth($event)"
+                aria-label="Filtrer le chiffre d'affaires par mois"
+                class="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-fresh-500/40 cursor-pointer"
+              >
+                <option value="all">Tous les mois</option>
+                @for (month of monthOptions; track month.value) {
+                  <option [value]="month.value">{{ month.label }}</option>
+                }
+              </select>
+            </h3>
+            <div class="relative h-72 flex items-center justify-center">
+              <canvas #revenueChart></canvas>
+              @if (!hasRevenueData() && !isLoading()) {
+                <div class="absolute inset-0 flex items-center justify-center text-xs text-slate-500">Aucune donnée par service disponible</div>
+              }
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  

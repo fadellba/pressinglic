@@ -1,0 +1,46 @@
+<div class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div
+        appFocusTrap
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-labelledby]="'modal-title'"
+        class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100"
+        (keydown.escape)="dismissed.emit()"
+      >
+
+        <div
+          class="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xl mb-4"
+          [ngClass]="confirmVariant === 'danger' ? 'bg-rose-100 text-rose-500' : 'bg-cyan-100 text-cyan-600'"
+        >
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+          </svg>
+        </div>
+
+        <h3 id="modal-title" class="text-xl font-bold text-slate-900 mb-2">{{ title }}</h3>
+        <p class="text-sm text-slate-500 mb-6">{{ message }}</p>
+
+        <div class="flex items-center gap-3">
+          <button
+            (click)="dismissed.emit()"
+            class="btn btn-md btn-outline-light flex-1"
+          >
+            Annuler
+          </button>
+          <button
+            (click)="confirmed.emit()"
+            class="btn btn-md flex-1 text-white font-extrabold shadow-lg transition-all"
+            [ngClass]="
+              confirmVariant === 'danger'
+                ? 'bg-rose-500 hover:bg-rose-400 shadow-rose-500/20'
+                : 'bg-cyan-500 hover:bg-cyan-400 shadow-cyan-500/20'
+            "
+          >
+            {{ confirmLabel }}
+          </button>
+        </div>
+
+      </div>
+    </div>

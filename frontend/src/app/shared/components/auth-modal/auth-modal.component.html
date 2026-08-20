@@ -1,0 +1,224 @@
+@if (ui.isAuthModalOpen()) {
+      
+      <div
+        class="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+        (click)="closeOnBackdrop($event)"
+        (keydown.escape)="ui.closeAuthModal()"
+        tabindex="-1"
+      >
+        
+        <div
+          appFocusTrap
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="auth-modal-title"
+          class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden"
+        >
+          
+          <div class="bg-slate-900 p-8 text-white text-center relative">
+            <button
+              (click)="ui.closeAuthModal()"
+              class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-full hover:bg-slate-800 transition-colors"
+              aria-label="Fermer la fenêtre de connexion"
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-fresh-500 to-cyan-400 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg">
+              P
+            </div>
+            <h3 id="auth-modal-title" class="text-xl font-extrabold text-white">Pressing LIC</h3>
+            <p class="text-xs text-slate-400 mt-1">Connectez-vous pour poursuivre votre commande en 1 clic</p>
+          </div>
+
+          
+          <div class="flex border-b border-slate-100 bg-slate-50">
+            <button
+              (click)="switchMode('login')"
+              [class.bg-white]="ui.authModalMode() === 'login'"
+              [class.text-slate-900]="ui.authModalMode() === 'login'"
+              [class.font-bold]="ui.authModalMode() === 'login'"
+              [class.border-b-2]="ui.authModalMode() === 'login'"
+              [class.border-fresh-500]="ui.authModalMode() === 'login'"
+              class="flex-1 py-3 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+            >
+              Connexion
+            </button>
+            <button
+              (click)="switchMode('register')"
+              [class.bg-white]="ui.authModalMode() === 'register'"
+              [class.text-slate-900]="ui.authModalMode() === 'register'"
+              [class.font-bold]="ui.authModalMode() === 'register'"
+              [class.border-b-2]="ui.authModalMode() === 'register'"
+              [class.border-fresh-500]="ui.authModalMode() === 'register'"
+              class="flex-1 py-3 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+            >
+              Créer un compte
+            </button>
+          </div>
+
+          
+          <div class="p-8">
+
+            
+            @if (errorMessage()) {
+              <div class="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                {{ errorMessage() }}
+              </div>
+            }
+
+            @if (ui.authModalMode() === 'login') {
+              <form (ngSubmit)="onLogin()" #loginForm="ngForm" class="space-y-4">
+                <div>
+                  <label for="login-email" class="form-label">Adresse Email</label>
+                  <input
+                    id="login-email"
+                    type="email"
+                    [(ngModel)]="loginData.email"
+                    name="email"
+                    required
+                    autocomplete="email"
+                    placeholder="exemple@domaine.com"
+                    [disabled]="isLoading()"
+                    class="input input-light"
+                  />
+                </div>
+
+                <div>
+                  <label for="login-password" class="form-label">Mot de passe</label>
+                  <input
+                    id="login-password"
+                    type="password"
+                    [(ngModel)]="loginData.password"
+                    name="password"
+                    required
+                    autocomplete="current-password"
+                    placeholder="••••••••"
+                    [disabled]="isLoading()"
+                    class="input input-light"
+                  />
+                </div>
+
+                <div class="pt-2">
+                  <button
+                    type="submit"
+                    [disabled]="isLoading() || !loginData.email || !loginData.password"
+                    class="btn btn-md btn-dark w-full"
+                  >
+                    @if (isLoading()) {
+                      <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Connexion en cours...</span>
+                    } @else {
+                      <span>Se connecter</span>
+                    }
+                  </button>
+                </div>
+
+                <p class="text-center text-xs text-slate-500 pt-2">
+                  Pas encore de compte ?
+                  <button type="button" (click)="switchMode('register')" class="text-fresh-600 font-semibold hover:underline ml-1">
+                    Créer un compte
+                  </button>
+                </p>
+              </form>
+            } @else {
+              <form (ngSubmit)="onRegister()" #registerForm="ngForm" class="space-y-4">
+                <div>
+                  <label for="register-name" class="form-label">Nom complet</label>
+                  <input
+                    type="text"
+                    id="register-name"
+                    [(ngModel)]="registerData.name"
+                    name="name"
+                    required
+                    autocomplete="name"
+                    placeholder="Jean Dupont"
+                    [disabled]="isLoading()"
+                    class="input input-light"
+                  />
+                </div>
+
+                <div>
+                  <label for="register-email" class="form-label">Adresse Email</label>
+                  <input
+                    id="register-email"
+                    type="email"
+                    [(ngModel)]="registerData.email"
+                    name="email"
+                    required
+                    autocomplete="email"
+                    placeholder="exemple@domaine.com"
+                    [disabled]="isLoading()"
+                    class="input input-light"
+                  />
+                </div>
+
+                <div>
+                  <label for="register-phone" class="form-label">Numéro de téléphone</label>
+                  <input
+                    type="tel"
+                    id="register-phone"
+                    [(ngModel)]="registerData.phone"
+                    name="phone"
+                    autocomplete="tel"
+                    placeholder="+221 77 000 00 00"
+                    [disabled]="isLoading()"
+                    class="input input-light"
+                  />
+                </div>
+
+                <div>
+                  <label for="register-password" class="form-label">Mot de passe</label>
+                  <input
+                    id="register-password"
+                    type="password"
+                    [(ngModel)]="registerData.password"
+                    name="password"
+                    required
+                    minlength="8"
+                    autocomplete="new-password"
+                    placeholder="Minimum 8 caractères"
+                    [disabled]="isLoading()"
+                    class="input input-light"
+                  />
+                </div>
+
+                <div class="pt-2">
+                  <button
+                    type="submit"
+                    [disabled]="isLoading() || !registerData.name || !registerData.email || !registerData.password"
+                    class="btn btn-md w-full bg-gradient-to-r from-fresh-500 to-emerald-600 hover:from-fresh-600 hover:to-emerald-700 text-white shadow-lg shadow-fresh-500/20"
+                  >
+                    @if (isLoading()) {
+                      <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Création du compte...</span>
+                    } @else {
+                      <span>Créer mon compte Client</span>
+                    }
+                  </button>
+                </div>
+
+                <p class="text-center text-xs text-slate-500 pt-2">
+                  Déjà un compte ?
+                  <button type="button" (click)="switchMode('login')" class="text-fresh-600 font-semibold hover:underline ml-1">
+                    Se connecter
+                  </button>
+                </p>
+              </form>
+            }
+          </div>
+
+        </div>
+      </div>
+    }

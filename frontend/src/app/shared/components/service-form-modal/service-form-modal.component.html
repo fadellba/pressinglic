@@ -1,0 +1,87 @@
+<div class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div
+        appFocusTrap
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="service-form-modal-title"
+        class="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-md w-full shadow-2xl text-white"
+        (keydown.escape)="dismissed.emit()"
+      >
+        <h3 id="service-form-modal-title" class="text-xl font-bold mb-4">
+          {{ editingService ? 'Modifier le Service' : 'Ajouter un Nouveau Service' }}
+        </h3>
+
+        <form (ngSubmit)="onSubmit()" class="space-y-4">
+          <div>
+            <label for="service-name" class="form-label-dark">Libellé du service</label>
+            <input
+              id="service-name"
+              type="text"
+              [(ngModel)]="formData.libelle"
+              name="libelle"
+              required
+              placeholder="Ex: Lavage & Repassage Costume"
+              class="input input-dark"
+            />
+          </div>
+
+          <div>
+            <label for="service-price" class="form-label-dark">Prix unitaire (FCFA)</label>
+            <input
+              id="service-price"
+              type="number"
+              [(ngModel)]="formData.prix_unitaire"
+              name="prix_unitaire"
+              required
+              min="0"
+              placeholder="2500"
+              class="input input-dark"
+            />
+          </div>
+
+          <div>
+            <label for="service-description" class="form-label-dark">Description</label>
+            <textarea
+              id="service-description"
+              [(ngModel)]="formData.description"
+              name="description"
+              rows="3"
+              placeholder="Détails du traitement..."
+              class="input input-dark"
+            ></textarea>
+          </div>
+
+          <div class="flex items-center gap-2 pt-2">
+            <input
+              type="checkbox"
+              [(ngModel)]="formData.est_actif"
+              name="est_actif"
+              id="est_actif"
+              class="w-4 h-4 rounded text-fresh-500 focus:ring-fresh-500"
+            />
+            <label for="est_actif" class="text-xs font-bold text-slate-300">Rendre immédiatement actif dans le catalogue client</label>
+          </div>
+
+          <div class="flex items-center gap-3 pt-4">
+            <button
+              type="button"
+              (click)="dismissed.emit()"
+              class="btn btn-md btn-outline-dark flex-1"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              [disabled]="isSaving"
+              class="btn btn-md btn-primary flex-1"
+            >
+              @if (isSaving) {
+                <span>Enregistrement...</span>
+              } @else {
+                <span>{{ editingService ? 'Mettre à jour' : 'Créer le service' }}</span>
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>

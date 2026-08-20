@@ -1,0 +1,187 @@
+<div class="py-12 bg-slate-50 min-h-screen">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        
+        <app-page-header
+          title="Mes Commandes & Tickets Pressing"
+          subtitle="Suivez en temps réel le statut de vos vêtements et téléchargez vos reçus PDF."
+        >
+          <button
+            (click)="loadTickets()"
+            class="btn btn-sm btn-outline-light"
+          >
+            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Actualiser</span>
+          </button>
+        </app-page-header>
+
+        
+        <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-6">
+          <button
+            (click)="setFilter('all')"
+            class="chip"
+            [ngClass]="activeFilter() === 'all' ? 'chip-active bg-slate-900 text-white' : 'chip-inactive-light'"
+          >
+            Tous les tickets ({{ tickets().length }})
+          </button>
+          <button
+            (click)="setFilter('active')"
+            class="chip"
+            [ngClass]="activeFilter() === 'active' ? 'chip-active bg-slate-900 text-white' : 'chip-inactive-light'"
+          >
+            En cours de traitement
+          </button>
+          <button
+            (click)="setFilter('pret')"
+            class="chip"
+            [ngClass]="activeFilter() === 'pret' ? 'chip-active bg-slate-900 text-white' : 'chip-inactive-light'"
+          >
+            Prêts à retirer
+          </button>
+        </div>
+
+        
+        @if (isLoading()) {
+          <div class="space-y-4">
+            @for (i of [1,2,3]; track i) {
+              <div class="h-44 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                <app-skeleton [lines]="3" [avatar]="true"></app-skeleton>
+              </div>
+            }
+          </div>
+        } @else {
+          @if (filteredTickets().length === 0) {
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm">
+              <app-empty-state
+                icon="🧺"
+                title="Aucun ticket dans cette catégorie"
+                message="Vous n'avez pas encore déposé de commande correspondant à ce filtre."
+              ></app-empty-state>
+            </div>
+          } @else {
+            <div class="space-y-6">
+              @for (ticket of pagedTickets(); track ticket.id) {
+                <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all">
+                  
+                  
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-3">
+                      <div class="w-12 h-12 rounded-2xl bg-slate-900 text-fresh-400 font-extrabold flex items-center justify-center text-sm shadow-md">
+                        #
+                      </div>
+                      <div>
+                        <div class="flex items-center gap-2">
+                          <span class="text-lg font-extrabold text-slate-900">{{ ticket.code_ticket }}</span>
+                          <app-badge [statut]="ticket.statut"></app-badge>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">Déposé le {{ ticket.created_at | date:'dd/MM/yyyy à HH:mm' }}</p>
+                      </div>
+                    </div>
+
+                    <div class="text-left sm:text-right">
+                      <span class="text-xs text-slate-400 block">Montant Total</span>
+                      <span class="text-lg font-extrabold text-fresh-600">{{ ticket.montant_total | cfa }}</span>
+                      <div class="mt-1">
+                        @if (ticket.est_paye) {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">✓ PAYÉ EN ESPÈCES</span>
+                        } @else {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">⏳ À PAYER AU RETRAIT</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+
+                  
+                  <div class="py-4">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Détail des vêtements</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      @for (item of ticket.items; track item.id) {
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs flex justify-between items-center">
+                          <span class="font-semibold text-slate-800">{{ item.service_libelle }}</span>
+                          <span class="text-slate-500 font-medium">x{{ item.quantite }} ({{ item.sous_total | cfa }})</span>
+                        </div>
+                      }
+                    </div>
+
+                    @if (ticket.notes) {
+                      <div class="mt-3 p-3 rounded-xl bg-amber-50/60 border border-amber-100 text-xs text-amber-900">
+                        <span class="font-bold">Consignes :</span> {{ ticket.notes }}
+                      </div>
+                    }
+                  </div>
+
+                  
+                  <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3 flex-wrap">
+                    <p class="text-xs text-slate-500">
+                      @if (ticket.statut === 'pret' || ticket.statut === 'recupere') {
+                        <span class="text-emerald-600 font-medium">✓ Reçu / Facture officiel disponible en PDF</span>
+                      } @else {
+                        <span>Le reçu PDF sera téléchargeable dès le statut "Prêt"</span>
+                      }
+                    </p>
+
+                    <div class="flex items-center gap-2">
+                      @if (canCancel(ticket)) {
+                        <button
+                          (click)="requestCancel(ticket)"
+                          class="btn btn-sm btn-danger-outline"
+                        >
+                          Annuler la commande
+                        </button>
+                      }
+
+                      @if (ticket.statut === 'pret' || ticket.statut === 'recupere') {
+                        <button
+                          (click)="downloadReceipt(ticket)"
+                          class="btn btn-sm btn-dark"
+                        >
+                          <svg class="w-4 h-4 text-fresh-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <span>Télécharger le Reçu PDF</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+
+                </div>
+              }
+            </div>
+
+            <app-pagination
+              [totalItems]="filteredTickets().length"
+              [pageSize]="pageSize"
+              [currentPage]="displayPage()"
+              [variant]="'light'"
+              (pageChange)="currentPage.set($event)"
+            ></app-pagination>
+
+            @if (hasMoreTickets()) {
+              <div class="mt-8 text-center">
+                <button
+                  (click)="loadMoreTickets()"
+                  [disabled]="isLoadingMore()"
+                  class="btn btn-md btn-dark"
+                >
+                  {{ isLoadingMore() ? 'Chargement...' : 'Charger plus de tickets' }}
+                </button>
+              </div>
+            }
+          }
+        }
+
+        
+        @if (pendingCancelTicket(); as ticket) {
+          <app-modal
+            title="Annuler la commande"
+            [message]="'Êtes-vous sûr de vouloir annuler la commande ' + ticket.code_ticket + ' ? Cette action est irréversible.'"
+            confirmLabel="Annuler la commande"
+            (confirmed)="confirmCancel()"
+            (dismissed)="pendingCancelTicket.set(null)"
+          ></app-modal>
+        }
+
+      </div>
+    </div>
