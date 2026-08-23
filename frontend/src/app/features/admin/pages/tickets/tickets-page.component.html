@@ -1,0 +1,189 @@
+
+    <div class="py-10 bg-slate-900 text-white min-h-screen">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Gestion des Tickets & Encaissements</h1>
+            <p class="text-sm text-slate-400 mt-1">Faites évoluer le statut des commandes et enregistrez les règlements au comptoir.</p>
+          </div>
+
+          <button
+            (click)="loadTickets()"
+            class="btn btn-sm btn-outline-dark self-start sm:self-auto"
+          >
+            Actualiser les tickets
+          </button>
+        </div>
+
+        
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+          <div class="relative w-full sm:w-72">
+            <input
+              type="text"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="onSearchChange($event)"
+              placeholder="Rechercher code, client..."
+              class="input input-dark py-2 pl-10"
+            />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto">
+            <button
+              (click)="setStatusFilter('all')"
+              class="chip"
+              [ngClass]="selectedStatusFilter() === 'all' ? 'chip-active bg-cyan-500 text-slate-950' : 'chip-inactive-dark'"
+            >
+              Tous ({{ tickets().length }})
+            </button>
+            <button
+              (click)="setStatusFilter('recu')"
+              class="chip"
+              [ngClass]="selectedStatusFilter() === 'recu' ? 'chip-active bg-cyan-500 text-slate-950' : 'chip-inactive-dark'"
+            >
+              {{ statusFilterLabels['recu'] }}
+            </button>
+            <button
+              (click)="setStatusFilter('en_traitement')"
+              class="chip"
+              [ngClass]="selectedStatusFilter() === 'en_traitement' ? 'chip-active bg-amber-500 text-slate-950' : 'chip-inactive-dark'"
+            >
+              {{ statusFilterLabels['en_traitement'] }}
+            </button>
+            <button
+              (click)="setStatusFilter('pret')"
+              class="chip"
+              [ngClass]="selectedStatusFilter() === 'pret' ? 'chip-active bg-emerald-500 text-slate-950' : 'chip-inactive-dark'"
+            >
+              {{ statusFilterLabels['pret'] }}
+            </button>
+          </div>
+        </div>
+
+        
+        <div class="bg-slate-800/80 rounded-3xl border border-slate-700/80 overflow-hidden shadow-2xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead class="bg-slate-950/80 text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th class="px-6 py-4">Code Ticket</th>
+                  <th class="px-6 py-4">Client</th>
+                  <th class="px-6 py-4">Statut Actuel</th>
+                  <th class="px-6 py-4">Montant Total</th>
+                  <th class="px-6 py-4">Paiement</th>
+                  <th class="px-6 py-4">Changer le statut</th>
+                </tr>
+              </thead>
+
+              <tbody class="divide-y divide-slate-800">
+                @if (isLoading()) {
+                  <tr>
+                    <td colspan="6" class="px-6 py-12 text-center text-slate-400">Chargement des tickets...</td>
+                  </tr>
+                } @else {
+                  @if (tickets().length === 0) {
+                    <tr>
+                      <td colspan="6" class="px-6 py-12 text-center text-slate-400">Aucun ticket trouvé.</td>
+                    </tr>
+                  } @else {
+                    @for (ticket of pagedTickets(); track ticket.id) {
+                      <tr class="hover:bg-slate-800/50 transition-colors">
+                        
+                        <td class="px-6 py-4 font-bold text-white">
+                          <div>{{ ticket.code_ticket }}</div>
+                          <div class="text-[11px] text-slate-400 font-normal">{{ ticket.created_at | date:'dd/MM/yyyy HH:mm' }}</div>
+                        </td>
+
+                        <td class="px-6 py-4">
+                          <div class="font-semibold text-white">{{ ticket.client?.name || 'Client #' + ticket.client_id }}</div>
+                          <div class="text-xs text-slate-400">{{ ticket.client?.email }}</div>
+                        </td>
+
+                        <td class="px-6 py-4">
+                          <app-badge [statut]="ticket.statut"></app-badge>
+                        </td>
+
+                        <td class="px-6 py-4 font-extrabold text-fresh-400">
+                          {{ ticket.montant_total | cfa }}
+                        </td>
+
+                        <td class="px-6 py-4">
+                          @if (ticket.est_paye) {
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              ✓ Payé (Espèces)
+                            </span>
+                          } @else if (ticket.statut === 'pret') {
+                            <button
+                              (click)="openPaymentModal(ticket)"
+                              class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-slate-950 transition-all border border-amber-500/30"
+                            >
+                              Enregistrer règlement
+                            </button>
+                          } @else if (ticket.statut === 'annule') {
+                            <span class="text-xs text-slate-500">—</span>
+                          } @else {
+                            <span class="text-xs text-slate-500 italic">À encaisser à la remise</span>
+                          }
+                        </td>
+
+                        <td class="px-6 py-4">
+                          <select
+                            [ngModel]="ticket.statut"
+                            (ngModelChange)="onStatusChange(ticket, $event)"
+                            [disabled]="validTransitionsFor(ticket).length === 0"
+                            class="select-dark px-3 py-1.5 rounded-lg text-xs font-semibold"
+                          >
+                            <option [value]="ticket.statut" disabled>{{ statusLabels[ticket.statut] }}</option>
+                            @for (status of statusOrder; track status) {
+                              @if (status !== ticket.statut && canTransitionTo(ticket, status)) {
+                                <option [value]="status">{{ statusLabels[status] }}</option>
+                              }
+                            }
+                          </select>
+                        </td>
+
+                      </tr>
+                    }
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <app-pagination
+          [totalItems]="tickets().length"
+          [pageSize]="pageSize"
+          [currentPage]="displayPage()"
+          [variant]="'dark'"
+          (pageChange)="currentPage.set($event)"
+        ></app-pagination>
+
+        @if (hasMoreTickets()) {
+          <div class="mt-6 text-center">
+            <button
+              (click)="loadMoreTickets()"
+              [disabled]="isLoadingMore()"
+              class="btn btn-md btn-outline-dark"
+            >
+              {{ isLoadingMore() ? 'Chargement...' : 'Charger plus de tickets' }}
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    
+    @if (selectedTicketForPayment(); as ticket) {
+      <app-payment-modal
+        [ticket]="ticket"
+        [isProcessing]="isProcessingPayment()"
+        (confirmed)="confirmPaymentAndSetRetrieved()"
+        (dismissed)="selectedTicketForPayment.set(null)"
+      ></app-payment-modal>
+    }
+  

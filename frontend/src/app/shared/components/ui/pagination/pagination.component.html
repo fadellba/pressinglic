@@ -1,0 +1,41 @@
+<div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6" [class.text-slate-400]="variant === 'dark'">
+      <p class="text-xs font-semibold">
+        {{ from }} – {{ to }} sur {{ totalItems }} ticket{{ totalItems > 1 ? 's' : '' }}
+      </p>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          (click)="goTo(currentPage - 1)"
+          [disabled]="currentPage <= 1"
+          [class.bg-slate-800]="variant === 'dark'"
+          [class.text-slate-200]="variant === 'dark'"
+          [class.border-slate-700]="variant === 'dark'"
+          [class.bg-white]="variant === 'light'"
+          [class.text-slate-700]="variant === 'light'"
+          [class.border-slate-200]="variant === 'light'"
+          class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Précédent
+        </button>
+
+        <span class="text-xs font-bold px-2" [class.text-slate-300]="variant === 'dark'" [class.text-slate-600]="variant === 'light'">
+          Page {{ currentPage }} / {{ totalPages }}
+        </span>
+
+        <button
+          type="button"
+          (click)="goTo(currentPage + 1)"
+          [disabled]="currentPage >= totalPages"
+          [class.bg-slate-800]="variant === 'dark'"
+          [class.text-slate-200]="variant === 'dark'"
+          [class.border-slate-700]="variant === 'dark'"
+          [class.bg-white]="variant === 'light'"
+          [class.text-slate-700]="variant === 'light'"
+          [class.border-slate-200]="variant === 'light'"
+          class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Suivant
+        </button>
+      </div>
+    </div>
